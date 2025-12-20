@@ -208,3 +208,37 @@ Wait for consent; never auto-create ADRs. Group related decisions (stacks, authe
 
 ## Code Standards
 See `.specify/memory/constitution.md` for code quality, testing, performance, security, and architecture principles.
+
+# Todo App - Hackathon II
+## Project Overview
+This is a monorepo using GitHub Spec-Kit for spec-driven development.
+## Spec-Kit Structure
+Specifications are organized in /specs:
+- /specs/overview.md - Project overview
+- /specs/features/ - Feature specs (what to build)
+- /specs/api/ - API endpoint and MCP tool specs
+- /specs/database/ - Schema and model specs
+- /specs/ui/ - Component and page specs
+## How to Use Specs
+1. Always read relevant spec before implementing
+2. Reference specs with: @specs/features/task-crud.md
+3. Update specs if requirements change
+## Project Structure
+- /frontend - Next.js 14 app
+- /backend - Python FastAPI server
+## Development Workflow
+1. Read spec: @specs/features/[feature].md
+2. Implement backend: @backend/CLAUDE.md
+3. Implement frontend: @frontend/CLAUDE.md
+4. Test and iterate
+## Commands
+- Frontend: cd frontend && npm run dev
+- Backend: cd backend && uvicorn main:app --reload
+- Both: docker-compose up
+
+## Active Technologies
+- TypeScript 5.x with Next.js 14 (App Router) + React 18, Next.js 14, Better Auth client, Tailwind CSS (002-frontend-task-management)
+- localStorage (JWT token only); Backend PostgreSQL via REST API (002-frontend-task-management)
+
+## Recent Changes
+- 002-frontend-task-management: Added TypeScript 5.x with Next.js 14 (App Router) + React 18, Next.js 14, Better Auth client, Tailwind CSS

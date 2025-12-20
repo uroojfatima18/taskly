@@ -1,55 +1,105 @@
-# [PROJECT_NAME] Constitution
-<!-- Example: Spec Constitution, TaskFlow Constitution, etc. -->
+<!--
+Sync Impact Report
+==================
+Version change: 0.0.0 → 1.0.0
+Bump rationale: MAJOR - Initial constitution establishment with all core principles
+
+Modified principles: N/A (initial creation)
+
+Added sections:
+- Coding Standards (Principle I)
+- Commit & PR Rules (Principle II)
+- Testing (Principle III)
+- Security (Principle IV)
+- Architecture Principles (Principle V)
+- Development Workflow (Section 2)
+- Governance (Section 3)
+
+Removed sections: N/A (initial creation)
+
+Templates requiring updates:
+- .specify/templates/plan-template.md: ✅ No changes needed (Constitution Check section is generic)
+- .specify/templates/spec-template.md: ✅ No changes needed (requirements section aligns with principles)
+- .specify/templates/tasks-template.md: ✅ No changes needed (test-first pattern supported)
+
+Follow-up TODOs: None
+-->
+
+# Hackathon Todo App Constitution
 
 ## Core Principles
 
-### [PRINCIPLE_1_NAME]
-<!-- Example: I. Library-First -->
-[PRINCIPLE_1_DESCRIPTION]
-<!-- Example: Every feature starts as a standalone library; Libraries must be self-contained, independently testable, documented; Clear purpose required - no organizational-only libraries -->
+### I. Coding Standards
 
-### [PRINCIPLE_2_NAME]
-<!-- Example: II. CLI Interface -->
-[PRINCIPLE_2_DESCRIPTION]
-<!-- Example: Every library exposes functionality via CLI; Text in/out protocol: stdin/args → stdout, errors → stderr; Support JSON + human-readable formats -->
+All code MUST adhere to language-specific style guidelines and strict type safety requirements:
 
-### [PRINCIPLE_3_NAME]
-<!-- Example: III. Test-First (NON-NEGOTIABLE) -->
-[PRINCIPLE_3_DESCRIPTION]
-<!-- Example: TDD mandatory: Tests written → User approved → Tests fail → Then implement; Red-Green-Refactor cycle strictly enforced -->
+- **Python**: MUST be PEP8 compliant. Use linters (flake8, black) to enforce.
+- **TypeScript**: MUST use strict mode with `"strict": true` in tsconfig.json. No implicit `any` types allowed.
+- **Tailwind CSS**: MUST use utility classes exclusively. No inline CSS styles permitted.
 
-### [PRINCIPLE_4_NAME]
-<!-- Example: IV. Integration Testing -->
-[PRINCIPLE_4_DESCRIPTION]
-<!-- Example: Focus areas requiring integration tests: New library contract tests, Contract changes, Inter-service communication, Shared schemas -->
+**Rationale**: Consistent code style reduces cognitive load during code review and enables automated quality checks.
 
-### [PRINCIPLE_5_NAME]
-<!-- Example: V. Observability, VI. Versioning & Breaking Changes, VII. Simplicity -->
-[PRINCIPLE_5_DESCRIPTION]
-<!-- Example: Text I/O ensures debuggability; Structured logging required; Or: MAJOR.MINOR.BUILD format; Or: Start simple, YAGNI principles -->
+### II. Commit & PR Rules
 
-### [PRINCIPLE_6_NAME]
+All version control operations MUST follow these rules:
 
+- Commit messages MUST be meaningful and describe the change's purpose (not just "fix" or "update").
+- Pull requests MUST pass all automated tests before merge approval.
+- PRs SHOULD include a brief description of changes and testing performed.
 
-[PRINCIPLE__DESCRIPTION]
+**Rationale**: Clear commit history enables efficient debugging and knowledge transfer; passing tests prevent regressions.
 
-## [SECTION_2_NAME]
-<!-- Example: Additional Constraints, Security Requirements, Performance Standards, etc. -->
+### III. Testing
 
-[SECTION_2_CONTENT]
-<!-- Example: Technology stack requirements, compliance standards, deployment policies, etc. -->
+Testing is mandatory at all layers of the application:
 
-## [SECTION_3_NAME]
-<!-- Example: Development Workflow, Review Process, Quality Gates, etc. -->
+- **Backend**: Unit tests MUST exist for all API endpoints. Use pytest for Python backend.
+- **Frontend**: Component rendering tests AND API integration tests MUST be implemented.
+- Test coverage SHOULD be maintained at a reasonable level for critical paths.
 
-[SECTION_3_CONTENT]
-<!-- Example: Code review requirements, testing gates, deployment approval process, etc. -->
+**Rationale**: Tests provide confidence in deployments and serve as living documentation of expected behavior.
+
+### IV. Security
+
+Security MUST be enforced at every layer:
+
+- **Authentication**: JWT tokens MUST be required for all API endpoints (except health checks and public routes).
+- **Secrets Management**: No secrets, tokens, or credentials in code. All sensitive values MUST use `.env` files and environment variables.
+- **User Isolation**: Users MUST only access their own data. Backend MUST enforce ownership checks on all data operations.
+- **Input Validation**: All user input MUST be validated and sanitized.
+
+**Rationale**: Security vulnerabilities can compromise user data and trust; defense-in-depth is mandatory.
+
+### V. Architecture Principles
+
+Development MUST follow these architectural guidelines:
+
+- **Smallest Viable Change**: Each feature/fix MUST be the minimal diff required. No unrelated refactoring.
+- **RESTful APIs**: All endpoints MUST use proper HTTP methods and return appropriate status codes (200, 201, 400, 401, 404, 500).
+- **Spec-Driven**: Implementation MUST follow specifications in `/specs/`. No ad-hoc feature additions.
+
+**Rationale**: Small changes reduce risk; REST conventions ensure predictable API behavior; specs provide alignment.
+
+## Development Workflow
+
+All development MUST follow this workflow:
+
+1. **Read Spec First**: Before implementing, read the relevant specification in `/specs/features/`.
+2. **Backend First**: Implement API endpoints before frontend integration.
+3. **Test as You Go**: Write tests alongside implementation, not after.
+4. **PR Review**: All changes require review before merging to main branch.
+
+**Environment Setup**:
+- Backend: `cd backend && uvicorn main:app --reload --port 8000`
+- Frontend: `cd frontend && npm run dev`
 
 ## Governance
-<!-- Example: Constitution supersedes all other practices; Amendments require documentation, approval, migration plan -->
 
-[GOVERNANCE_RULES]
-<!-- Example: All PRs/reviews must verify compliance; Complexity must be justified; Use [GUIDANCE_FILE] for runtime development guidance -->
+This constitution establishes the authoritative rules for the Hackathon Todo App project:
 
-**Version**: [CONSTITUTION_VERSION] | **Ratified**: [RATIFICATION_DATE] | **Last Amended**: [LAST_AMENDED_DATE]
-<!-- Example: Version: 2.1.1 | Ratified: 2025-06-13 | Last Amended: 2025-07-16 -->
+- **Supremacy**: This constitution supersedes all other development practices. Conflicts MUST be resolved in favor of constitution principles.
+- **Amendments**: Changes to this constitution require documentation of rationale and versioning update.
+- **Compliance**: All PRs and code reviews MUST verify compliance with these principles.
+- **Exceptions**: Any deviation from these principles MUST be documented with justification in the PR description.
+
+**Version**: 1.0.0 | **Ratified**: 2025-12-11 | **Last Amended**: 2025-12-11

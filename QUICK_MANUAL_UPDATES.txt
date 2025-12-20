@@ -1,0 +1,69 @@
+TASKLY THEME OVERHAUL - QUICK MANUAL UPDATES GUIDE
+===================================================
+
+COMPLETED (Automated):
+✓ frontend/tailwind.config.ts - New dark/navy/purple colors configured
+✓ frontend/src/app/globals.css - Dark theme styling applied
+
+REMAINING TASKS (Manual edits needed):
+=================================
+
+1. LAYOUT FILE
+   File: frontend/src/app/layout.tsx
+   Lines to remove: 7 (ThemeProvider import)
+   Lines to remove: 27-29 (ThemeProvider wrapper)
+   Keep only: <AuthProvider>{children}</AuthProvider>
+
+2. NAVBAR COMPONENT  
+   File: frontend/src/components/Navbar.tsx
+   Change line 8: variant = 'light' → variant = 'dark'
+   Replace: 'bg-white/80 backdrop-blur-md' with 'bg-dark-surface/80 backdrop-blur-md border-b border-dark-border'
+   Replace: gradient styling with 'bg-gradient-taskly'
+   Replace: 'w-8 h-8' with 'w-9 h-9'
+
+3. DASHBOARD PAGE
+   File: frontend/src/app/dashboard/page.tsx
+   Line 7: Remove ThemeToggle import
+   Line 358: Remove <ThemeToggle /> component
+   
+   Update these sections with dark theme classes:
+   - Header (lines 328-385): bg-dark-surface text-neutral-100
+   - Modal (lines 217-300): bg-dark-surface border-dark-border
+   - Add Task Form (lines 433-469): bg-dark-surface bg-dark-elevated
+   - Task Cards (lines 504-600): bg-dark-surface border-dark-border
+   - Wrap main content: min-h-screen bg-dark-bg
+
+4. DELETE FILES
+   Delete: frontend/src/components/ui/ThemeToggle.tsx
+   Delete: frontend/src/context/ThemeContext.tsx
+
+5. OPTIONAL: Auth Pages
+   Update: frontend/src/app/login/page.tsx
+   Update: frontend/src/app/signup/page.tsx
+   Apply same dark theme styling as dashboard
+
+KEY COLOR CLASSES TO USE:
+========================
+bg-dark-bg          (#0B1020) - Page background
+bg-dark-surface     (#11162A) - Cards/sections
+bg-dark-elevated    (#161B33) - Elevated panels
+bg-dark-border      (#2A2F4A) - Borders
+bg-dark-hover       (#1C2140) - Hover states
+bg-gradient-taskly  - Logo/branding (purple gradient)
+bg-gradient-hero    - Buttons
+text-neutral-100    - Primary text (light)
+text-neutral-400    - Secondary text
+shadow-glow         - Glowing shadows
+
+TEST AFTER UPDATING:
+===================
+- Dark navy background visible
+- Electric purple buttons work
+- Text readable on dark backgrounds
+- Hover effects smooth
+- No theme toggle button visible
+- Modal styling correct
+- Toast notifications styled
+- All transitions smooth (150-200ms)
+
+For complete details, see: THEME_OVERHAUL_SUMMARY.md

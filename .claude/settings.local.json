@@ -1,0 +1,8 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(dir /b /s \"D:\\Urooj\\UroojCode\\hackthon-todo2\\specs\")",
+      "Bash(cat:*)"
+    ]
+  }
+}
