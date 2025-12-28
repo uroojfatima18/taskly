@@ -3,6 +3,7 @@
 import { useState, FormEvent } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
+import { TasklyLogo } from '@/components/ui/TasklyLogo';
 
 export default function LoginPage() {
   const [email, setEmail] = useState('');
@@ -82,6 +83,9 @@ export default function LoginPage() {
         <div className="w-full max-w-md">
           {/* Logo and Title */}
           <div className="text-center mb-8">
+            <div className="flex justify-center mb-4">
+              <TasklyLogo size="lg" />
+            </div>
             <h1 className="text-4xl font-bold bg-gradient-taskly bg-clip-text text-transparent mb-3">
               Taskly
             </h1>
@@ -91,8 +95,8 @@ export default function LoginPage() {
           {/* Form Card */}
           <div className="bg-dark-surface rounded-2xl border border-dark-border p-8 backdrop-blur-sm">
             {errors.form && (
-              <div className="mb-6 p-4 bg-red-900/30 border border-red-700/50 rounded-lg">
-                <p className="text-sm text-red-300">{errors.form}</p>
+              <div className="mb-6 p-4 bg-red-950/50 border border-red-500/30 rounded-lg backdrop-blur-sm">
+                <p className="text-sm text-red-200 font-medium">{errors.form}</p>
               </div>
             )}
 

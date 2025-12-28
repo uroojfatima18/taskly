@@ -46,9 +46,9 @@ export function IconCircle({
         <div className={sizeIconClasses[size]}>{icon}</div>
       </div>
 
-      {/* Badge in top-right corner */}
+      {/* Badge in top-right corner - Premium step number styling */}
       {badge !== undefined && (
-        <div className="absolute -top-1 -right-1 min-w-[20px] h-5 bg-primary-600 text-white text-xs font-bold rounded-full flex items-center justify-center">
+        <div className="absolute -top-2 -right-2 min-w-[32px] h-8 bg-gradient-to-br from-primary-500 to-primary-700 text-white text-sm font-black rounded-full flex items-center justify-center shadow-lg shadow-primary-600/50 border border-primary-400/50 hover:scale-110 hover:shadow-xl hover:shadow-primary-600/70 transition-all duration-300">
           {badge}
         </div>
       )}

@@ -35,3 +35,14 @@ app.add_middleware(LoggingMiddleware)
 app.include_router(health.router, prefix="/api")
 app.include_router(auth.router, prefix="/api")
 app.include_router(tasks.router, prefix="/api")
+
+
+@app.get("/")
+def root():
+    """Root endpoint - API info."""
+    return {
+        "name": "Todo App API",
+        "version": "1.0.0",
+        "docs": "/docs",
+        "health": "/api/health",
+    }

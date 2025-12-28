@@ -96,11 +96,11 @@ export function AnimatedChaosSection() {
   };
 
   return (
-    <section className="pt-20 sm:pt-32 lg:pt-44 pb-20 sm:pb-28 lg:pb-32 overflow-x-clip">
+    <section className="py-16 sm:py-20 overflow-x-clip">
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 overflow-visible">
         {/* Section Header */}
         <motion.div
-          className="text-center mb-12 sm:mb-20"
+          className="text-center mb-10 sm:mb-12"
           initial="hidden"
           whileInView="visible"
           viewport={{ once: true, amount: 0.3 }}
@@ -121,7 +121,7 @@ export function AnimatedChaosSection() {
             className="text-base sm:text-lg text-neutral-400 max-w-2xl mx-auto font-regular tracking-wide leading-relaxed"
             variants={itemVariants}
           >
-            We understand the struggle. That's why we built something different.
+            We understand the struggle. That&apos;s why we built something different.
           </motion.p>
         </motion.div>
 

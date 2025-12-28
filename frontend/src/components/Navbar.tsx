@@ -1,7 +1,8 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
+import { TasklyLogo } from '@/components/ui/TasklyLogo';
 
 interface NavbarProps {
   variant?: 'light' | 'dark';
@@ -11,17 +12,31 @@ interface NavbarProps {
 export function Navbar({ variant = 'dark', withBorder = true }: NavbarProps) {
   const [isMenuOpen, setIsMenuOpen] = useState(false);
 
+  // Close mobile menu on ESC key press
+  const handleEscapeKey = useCallback((event: KeyboardEvent) => {
+    if (event.key === 'Escape' && isMenuOpen) {
+      setIsMenuOpen(false);
+    }
+  }, [isMenuOpen]);
+
+  useEffect(() => {
+    if (isMenuOpen) {
+      document.addEventListener('keydown', handleEscapeKey);
+      return () => document.removeEventListener('keydown', handleEscapeKey);
+    }
+  }, [isMenuOpen, handleEscapeKey]);
+
   return (
-    <nav className="sticky top-0 z-40 transition-all duration-300 bg-dark-surface border-b border-dark-border">
+    <nav
+      className="sticky top-0 z-40 transition-all duration-300 bg-dark-surface border-b border-dark-border"
+      role="navigation"
+      aria-label="Main navigation"
+    >
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div className="flex items-center justify-between h-16">
           {/* Logo */}
           <Link href="/" className="flex items-center gap-3 group">
-            <div className="w-8 h-8 rounded-lg bg-gradient-to-br from-primary-600 to-accent-500 flex items-center justify-center shadow-glow">
-              <svg className="w-5 h-5 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-3 7h3m-3 4h3m-6-4h.01M9 16h.01" />
-              </svg>
-            </div>
+            <TasklyLogo size="md" className="transition-transform duration-300 group-hover:scale-110" />
             <div className="flex flex-col">
               <span className="text-xl font-bold gradient-text">Taskly</span>
               <span className="text-xs text-neutral-400 hidden sm:block">Task Management</span>
@@ -30,17 +45,26 @@ export function Navbar({ variant = 'dark', withBorder = true }: NavbarProps) {
 
           {/* Desktop Navigation */}
           <div className="hidden md:flex items-center gap-1">
-            <Link href="/dashboard" className="px-4 py-2 rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300">
+            <Link
+              href="/dashboard"
+              className="px-4 py-3 min-h-[44px] rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-surface flex items-center"
+            >
               Dashboard
             </Link>
           </div>
 
           {/* Desktop Auth Buttons */}
           <div className="hidden md:flex items-center gap-3">
-            <Link href="/login" className="px-4 py-2 rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300">
+            <Link
+              href="/login"
+              className="px-4 py-3 min-h-[44px] rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-surface flex items-center"
+            >
               Login
             </Link>
-            <Link href="/signup" className="btn-primary text-sm">
+            <Link
+              href="/signup"
+              className="btn-primary text-sm min-h-[44px] flex items-center focus-visible:ring-2 focus-visible:ring-primary-300 focus-visible:ring-offset-2"
+            >
               Sign Up
             </Link>
           </div>
@@ -48,9 +72,10 @@ export function Navbar({ variant = 'dark', withBorder = true }: NavbarProps) {
           {/* Mobile Hamburger Button */}
           <button
             onClick={() => setIsMenuOpen(!isMenuOpen)}
-            className="md:hidden p-2 rounded-lg text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 focus:outline-none focus:ring-2 focus:ring-primary-500"
-            aria-label="Toggle menu"
+            className="md:hidden p-3 min-w-[44px] min-h-[44px] rounded-lg text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 focus:outline-none focus-visible:ring-2 focus-visible:ring-primary-500 focus-visible:ring-offset-2 focus-visible:ring-offset-dark-surface flex items-center justify-center"
+            aria-label={isMenuOpen ? 'Close navigation menu' : 'Open navigation menu'}
             aria-expanded={isMenuOpen}
+            aria-controls="mobile-menu"
           >
             <div className="w-6 h-5 flex flex-col justify-between">
               <span
@@ -75,30 +100,36 @@ export function Navbar({ variant = 'dark', withBorder = true }: NavbarProps) {
 
       {/* Mobile Menu */}
       <div
+        id="mobile-menu"
         className={`md:hidden overflow-hidden transition-all duration-300 ease-in-out ${
           isMenuOpen ? 'max-h-64 opacity-100' : 'max-h-0 opacity-0'
         }`}
+        role="menu"
+        aria-hidden={!isMenuOpen}
       >
         <div className="px-4 py-4 space-y-2 bg-dark-elevated border-t border-dark-border">
           <Link
             href="/dashboard"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-4 py-3 rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 active:scale-[0.98]"
+            className="block px-4 py-3 min-h-[44px] rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary-500"
+            role="menuitem"
           >
             Dashboard
           </Link>
-          <div className="h-px bg-dark-border my-2" />
+          <div className="h-px bg-dark-border my-2" aria-hidden="true" />
           <Link
             href="/login"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-4 py-3 rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 active:scale-[0.98]"
+            className="block px-4 py-3 min-h-[44px] rounded-lg font-medium text-neutral-300 hover:text-white hover:bg-dark-hover transition-all duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary-500"
+            role="menuitem"
           >
             Login
           </Link>
           <Link
             href="/signup"
             onClick={() => setIsMenuOpen(false)}
-            className="block px-4 py-3 rounded-lg font-medium text-center bg-gradient-to-r from-primary-600 to-accent-500 text-white hover:opacity-90 transition-all duration-300 active:scale-[0.98]"
+            className="block px-4 py-3 min-h-[44px] rounded-lg font-medium text-center bg-gradient-to-r from-primary-600 to-accent-500 text-white hover:opacity-90 transition-all duration-300 active:scale-[0.98] focus-visible:ring-2 focus-visible:ring-primary-300"
+            role="menuitem"
           >
             Sign Up
           </Link>

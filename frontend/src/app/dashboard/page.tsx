@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
-import { AnalyticsDashboard } from '@/components/analytics/AnalyticsDashboard';
+import { TasklyLogo } from '@/components/ui/TasklyLogo';
 
 
 interface Task {
@@ -16,7 +16,13 @@ interface Task {
   user_id: string;
 }
 
-type FilterType = 'all' | 'pending' | 'completed';
+type FilterType = 'all' | 'pending' | 'completed' | 'to_do' | 'in_progress' | 'done';
+
+const STATUS_LABELS: Record<string, string> = {
+  to_do: 'To Do',
+  in_progress: 'In Progress',
+  done: 'Done',
+};
 
 export default function DashboardPage() {
   const [tasks, setTasks] = useState<Task[]>([]);
@@ -24,12 +30,17 @@ export default function DashboardPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [userName, setUserName] = useState<string>('');
+  const [userEmail, setUserEmail] = useState<string>('');
   const [isDemoUser, setIsDemoUser] = useState(true);
   const [showSignInModal, setShowSignInModal] = useState(false);
+  const [showCreateModal, setShowCreateModal] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
 
   // Form states
   const [newTitle, setNewTitle] = useState('');
   const [newDescription, setNewDescription] = useState('');
+  const [newDueDate, setNewDueDate] = useState<string>('');
+  const [newStatus, setNewStatus] = useState<'to_do' | 'in_progress' | 'done'>('to_do');
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   // Edit states
@@ -67,12 +78,14 @@ export default function DashboardPage() {
           localStorage.setItem('auth_user', JSON.stringify(session.user));
           localStorage.setItem('is_demo_user', 'true');
           setUserName(session.user.name);
+          setUserEmail(session.user.email);
           setIsDemoUser(true);
         } else {
           const userJson = localStorage.getItem('auth_user');
           if (userJson) {
             const user = JSON.parse(userJson);
             setUserName(user.name);
+            setUserEmail(user.email);
           }
           setIsDemoUser(isDemo === 'true');
         }
@@ -85,6 +98,7 @@ export default function DashboardPage() {
     };
 
     initializeDemoSession();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   const fetchTasks = useCallback(async () => {
@@ -101,7 +115,8 @@ export default function DashboardPage() {
   }, [filter]);
 
   useEffect(() => {
-    if (localStorage.getItem('auth_token')) {
+    const token = localStorage.getItem('auth_token');
+    if (token) {
       fetchTasks();
     }
   }, [filter, fetchTasks]);
@@ -110,7 +125,6 @@ export default function DashboardPage() {
     e.preventDefault();
     if (!newTitle.trim() || isSubmitting) return;
 
-    // Demo users can add tasks to try the feature
     setIsSubmitting(true);
     try {
       const newTask = await api.createTask({
@@ -120,6 +134,9 @@ export default function DashboardPage() {
       setTasks([newTask, ...tasks]);
       setNewTitle('');
       setNewDescription('');
+      setNewDueDate('');
+      setNewStatus('to_do');
+      setShowCreateModal(false);
       showToast('Task created successfully', 'success');
     } catch (err) {
       showToast(err instanceof Error ? err.message : 'Failed to create task', 'error');
@@ -206,10 +223,31 @@ export default function DashboardPage() {
   };
 
   const filteredTasks = tasks.filter((task) => {
-    if (filter === 'pending') return !task.completed;
-    if (filter === 'completed') return task.completed;
+    // Apply status filter
+    if (filter === 'pending') {
+      if (task.completed) return false;
+    } else if (filter === 'completed' || filter === 'done') {
+      if (!task.completed) return false;
+    }
+
+    // Apply search filter
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      return (
+        task.title.toLowerCase().includes(query) ||
+        (task.description?.toLowerCase().includes(query) ?? false)
+      );
+    }
+
     return true;
   });
+
+  // Calculate task statistics
+  const totalTasks = tasks.length;
+  const completedTasks = tasks.filter((t) => t.completed).length;
+  const toDoTasks = tasks.filter((t) => !t.completed).length;
+  const inProgressTasks = 0; // Would need status field in backend
+  const doneTasks = completedTasks;
 
   return (
     <div className="min-h-screen">
@@ -224,7 +262,7 @@ export default function DashboardPage() {
             {/* Close button */}
             <button
               onClick={() => setShowSignInModal(false)}
-              className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-300 hover:bg-neutral-100 rounded-lg transition-all"
+              className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-200 hover:bg-dark-elevated rounded-lg transition-all"
             >
               <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
@@ -232,8 +270,8 @@ export default function DashboardPage() {
             </button>
 
             {/* Icon */}
-            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-blue-100 to-indigo-100 rounded-2xl flex items-center justify-center">
-              <svg className="w-8 h-8 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="w-16 h-16 mx-auto mb-6 bg-gradient-to-br from-primary-900/30 to-primary-800/30 rounded-2xl flex items-center justify-center border border-primary-600/30">
+              <svg className="w-8 h-8 text-primary-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z" />
               </svg>
             </div>
@@ -247,8 +285,8 @@ export default function DashboardPage() {
             </p>
 
             {/* Features list */}
-            <div className="bg-neutral-50 rounded-xl p-4 mb-6">
-              <p className="text-sm font-semibold text-neutral-700 mb-3">With an account you can:</p>
+            <div className="bg-dark-elevated border border-dark-border rounded-xl p-4 mb-6">
+              <p className="text-sm font-semibold text-neutral-200 mb-3">With an account you can:</p>
               <ul className="space-y-2">
                 <li className="flex items-center gap-2 text-sm text-neutral-300">
                   <svg className="w-4 h-4 text-green-500" fill="currentColor" viewBox="0 0 20 20">
@@ -325,58 +363,60 @@ export default function DashboardPage() {
       )}
 
       {/* Header */}
-      <header className="sticky top-0 z-40 bg-dark-surface/80 backdrop-blur-md border-b border-dark-border/50 shadow-sm">
+      <header className="sticky top-0 z-40 bg-dark-bg border-b border-dark-border/50 shadow-sm">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
           <div className="flex items-center justify-between">
             <Link href="/" className="flex items-center gap-3 group">
-              <div className="w-10 h-10 rounded-xl bg-gradient-to-br from-blue-600 to-blue-800 flex items-center justify-center shadow-md group-hover:shadow-lg transition-all">
-                <svg className="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
-                </svg>
+              <TasklyLogo size="md" className="transition-transform duration-300 group-hover:scale-110" />
+              <div className="flex flex-col">
+                <span className="text-xl font-bold gradient-text">Taskly</span>
+                <span className="text-xs text-neutral-400 hidden sm:block">Task Management</span>
               </div>
-              <span className="text-xl font-bold bg-gradient-to-r from-blue-600 to-blue-800 bg-clip-text text-transparent">
-                Taskly
-              </span>
             </Link>
 
             <div className="flex items-center gap-4">
-              <div className="hidden sm:block text-right">
-                <div className="flex items-center gap-2">
+              {!isDemoUser && userEmail && (
+                <div className="text-right">
                   <p className="text-sm font-medium text-neutral-100">
-                    {isDemoUser ? 'Demo User' : userName || 'User'}
+                    {userEmail}
                   </p>
-                  {isDemoUser && (
-                    <span className="px-2 py-0.5 bg-amber-100 text-amber-700 text-xs font-semibold rounded-full">
-                      Demo
-                    </span>
-                  )}
                 </div>
-                <p className="text-xs text-neutral-500">
-                  {isDemoUser ? 'Try it out!' : 'demo@taskly.app'}
-                </p>
-              </div>
+              )}
               {isDemoUser ? (
                 <Link
                   href="/login"
-                  className="px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
+                  className="px-4 py-2 bg-gradient-to-r from-primary-600 to-primary-700 text-white text-sm font-semibold rounded-lg shadow-md hover:shadow-lg transition-all"
                 >
                   Sign In
                 </Link>
               ) : (
-                <button
-                  onClick={() => {
-                    localStorage.removeItem('auth_token');
-                    localStorage.removeItem('auth_user');
-                    localStorage.removeItem('is_demo_user');
-                    window.location.href = '/';
-                  }}
-                  className="p-2 text-neutral-500 hover:text-neutral-700 hover:bg-neutral-100 rounded-lg transition-all"
-                  title="Sign out"
-                >
-                  <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
-                  </svg>
-                </button>
+                <div className="flex items-center gap-2">
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('auth_token');
+                      localStorage.removeItem('auth_user');
+                      localStorage.removeItem('is_demo_user');
+                      window.location.href = '/';
+                    }}
+                    className="p-2 text-neutral-400 hover:text-neutral-200 hover:bg-dark-surface rounded-lg transition-all"
+                    title="Sign out"
+                  >
+                    <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                    </svg>
+                  </button>
+                  <button
+                    onClick={() => {
+                      localStorage.removeItem('auth_token');
+                      localStorage.removeItem('auth_user');
+                      localStorage.removeItem('is_demo_user');
+                      window.location.href = '/';
+                    }}
+                    className="px-4 py-2 text-neutral-100 text-sm font-medium hover:text-white transition-all"
+                  >
+                    Sign out
+                  </button>
+                </div>
               )}
             </div>
           </div>
@@ -425,79 +465,117 @@ export default function DashboardPage() {
           </div>
         )}
 
-        {/* Analytics Dashboard */}
-        {!isLoading && <AnalyticsDashboard tasks={tasks} />}
-
-        {/* Add Task Form */}
-        <div className="mb-8 bg-dark-surface/90 backdrop-blur-sm rounded-2xl shadow-lg border border-dark-border/50 overflow-hidden">
-          <div className="px-6 py-4 bg-gradient-to-r from-blue-50 to-indigo-50 border-b border-dark-border/50">
-            <h2 className="text-lg font-semibold text-neutral-100 flex items-center gap-2">
-              <svg className="w-5 h-5 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        {/* Page Header */}
+        <div className="mb-8">
+          <div className="flex items-start justify-between gap-4 mb-4">
+            <div>
+              <h1 className="text-4xl font-bold text-neutral-100 mb-2">Your Tasks</h1>
+              <p className="text-accent-300">
+                {totalTasks} total • {completedTasks} completed
+              </p>
+            </div>
+            <button
+              onClick={() => setShowCreateModal(true)}
+              className="px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all flex items-center gap-2"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
               </svg>
-              Add New Task
-            </h2>
+              New Task
+            </button>
           </div>
-          <form onSubmit={handleAddTask} className="p-6">
-            <div className="space-y-4">
-              <input
-                type="text"
-                value={newTitle}
-                onChange={(e) => setNewTitle(e.target.value)}
-                placeholder="What needs to be done?"
-                className="w-full px-4 py-3 bg-neutral-50 border-2 border-dark-border rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all"
-                disabled={isSubmitting}
-              />
-              <textarea
-                value={newDescription}
-                onChange={(e) => setNewDescription(e.target.value)}
-                placeholder="Add a description (optional)"
-                rows={2}
-                className="w-full px-4 py-3 bg-neutral-50 border-2 border-dark-border rounded-xl focus:border-blue-500 focus:ring-2 focus:ring-blue-200 outline-none transition-all resize-none"
-                disabled={isSubmitting}
-              />
-              <button
-                type="submit"
-                disabled={isSubmitting || !newTitle.trim()}
-                className="w-full sm:w-auto px-6 py-3 bg-gradient-to-r from-blue-600 to-blue-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg hover:from-blue-700 hover:to-blue-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
-              >
-                {isSubmitting ? 'Adding...' : 'Add Task'}
-              </button>
-            </div>
-          </form>
+
+          {/* Search Bar */}
+          <div className="relative">
+            <svg className="absolute left-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
+            </svg>
+            <input
+              type="text"
+              placeholder="Search tasks..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full pl-12 pr-4 py-3 bg-dark-surface border border-dark-border rounded-xl text-neutral-100 placeholder-neutral-400 focus:border-primary-500 focus:ring-2 focus:ring-primary-500/20 outline-none transition-all"
+            />
+          </div>
         </div>
 
         {/* Filter Tabs */}
-        <div className="mb-6 flex gap-2">
-          {(['all', 'pending', 'completed'] as FilterType[]).map((f) => (
-            <button
-              key={f}
-              onClick={() => setFilter(f)}
-              className={`px-4 py-2 rounded-xl font-medium transition-all ${
-                filter === f
-                  ? 'bg-blue-600 text-white shadow-md'
-                  : 'bg-dark-surface/80 text-neutral-300 hover:bg-neutral-100'
-              }`}
-            >
-              {f.charAt(0).toUpperCase() + f.slice(1)}
-            </button>
-          ))}
+        <div className="mb-6 flex gap-2 overflow-x-auto pb-2">
+          <button
+            onClick={() => setFilter('all')}
+            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all ${
+              filter === 'all'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'bg-dark-surface text-neutral-300 hover:bg-dark-surface/80'
+            }`}
+          >
+            All ({totalTasks})
+          </button>
+          <button
+            onClick={() => setFilter('pending')}
+            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
+              filter === 'pending'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'bg-dark-surface text-neutral-300 hover:bg-dark-surface/80'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+            </svg>
+            To Do ({toDoTasks})
+          </button>
+          <button
+            onClick={() => setFilter('in_progress')}
+            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
+              filter === 'in_progress'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'bg-dark-surface text-neutral-300 hover:bg-dark-surface/80'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+            </svg>
+            In Progress ({inProgressTasks})
+          </button>
+          <button
+            onClick={() => setFilter('done')}
+            className={`px-4 py-2 rounded-xl font-medium whitespace-nowrap transition-all flex items-center gap-2 ${
+              filter === 'done'
+                ? 'bg-primary-600 text-white shadow-md'
+                : 'bg-dark-surface text-neutral-300 hover:bg-dark-surface/80'
+            }`}
+          >
+            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+            </svg>
+            Done ({doneTasks})
+          </button>
         </div>
 
         {/* Task List */}
         <div className="space-y-3">
           {isLoading ? (
             <div className="text-center py-12">
-              <div className="w-8 h-8 border-4 border-blue-200 border-t-blue-600 rounded-full animate-spin mx-auto" />
-              <p className="mt-4 text-neutral-500">Loading tasks...</p>
+              <div className="w-8 h-8 border-4 border-primary-200 border-t-primary-600 rounded-full animate-spin mx-auto" />
+              <p className="mt-4 text-neutral-400">Loading tasks...</p>
             </div>
           ) : filteredTasks.length === 0 ? (
-            <div className="text-center py-16 bg-dark-surface/80 backdrop-blur-sm rounded-2xl border-2 border-dashed border-dark-border">
-              <svg className="w-16 h-16 text-neutral-300 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div className="text-center py-16 bg-dark-surface/50 backdrop-blur-sm rounded-2xl border-2 border-dashed border-dark-border">
+              <svg className="w-16 h-16 text-neutral-400 mx-auto mb-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                 <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={1.5} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
               </svg>
-              <h3 className="text-lg font-semibold text-neutral-700">No tasks yet</h3>
-              <p className="text-neutral-500 mt-1">Create your first task above!</p>
+              <h3 className="text-lg font-semibold text-neutral-200">No tasks yet</h3>
+              <p className="text-neutral-400 mt-1">Create your first task to get started.</p>
+              <button
+                onClick={() => setShowCreateModal(true)}
+                className="mt-6 px-6 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-semibold rounded-xl shadow-md hover:shadow-lg transition-all inline-flex items-center gap-2"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 4v16m8-8H4" />
+                </svg>
+                Create Task
+              </button>
             </div>
           ) : (
             filteredTasks.map((task) => (
@@ -515,13 +593,13 @@ export default function DashboardPage() {
                       type="text"
                       value={editTitle}
                       onChange={(e) => setEditTitle(e.target.value)}
-                      className="w-full px-3 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-200 outline-none"
+                      className="w-full px-3 py-2 bg-dark-elevated border-2 border-primary-600/30 rounded-lg text-neutral-100 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all"
                       autoFocus
                     />
                     <textarea
                       value={editDescription}
                       onChange={(e) => setEditDescription(e.target.value)}
-                      className="w-full px-3 py-2 border-2 border-dark-border rounded-lg focus:border-blue-300 focus:ring-2 focus:ring-blue-200 outline-none resize-none"
+                      className="w-full px-3 py-2 bg-dark-elevated border-2 border-dark-border rounded-lg text-neutral-100 placeholder-neutral-500 focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none resize-none transition-all"
                       rows={2}
                     />
                     <div className="flex gap-2">
@@ -560,11 +638,11 @@ export default function DashboardPage() {
 
                     {/* Task Content */}
                     <div className="flex-1 min-w-0">
-                      <h3 className={`font-semibold transition-all ${task.completed ? 'text-neutral-400 line-through' : 'text-neutral-100'}`}>
+                      <h3 className={`font-semibold transition-all ${task.completed ? 'text-neutral-600 line-through' : 'text-neutral-100'}`}>
                         {task.title}
                       </h3>
                       {task.description && (
-                        <p className={`mt-1 text-sm ${task.completed ? 'text-neutral-400' : 'text-neutral-300'}`}>
+                        <p className={`mt-1 text-sm ${task.completed ? 'text-neutral-600' : 'text-neutral-300'}`}>
                           {task.description}
                         </p>
                       )}
@@ -601,6 +679,137 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Create Task Modal */}
+      {showCreateModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+          <div
+            className="absolute inset-0 bg-black/50 backdrop-blur-sm"
+            onClick={() => {
+              setShowCreateModal(false);
+              setNewTitle('');
+              setNewDescription('');
+              setNewDueDate('');
+              setNewStatus('to_do');
+            }}
+          />
+          <div className="relative bg-dark-surface rounded-2xl shadow-2xl max-w-md w-full p-8 animate-scale-in border border-dark-border/50">
+            {/* Close button */}
+            <button
+              onClick={() => {
+                setShowCreateModal(false);
+                setNewTitle('');
+                setNewDescription('');
+                setNewDueDate('');
+                setNewStatus('to_do');
+              }}
+              className="absolute top-4 right-4 p-2 text-neutral-400 hover:text-neutral-200 hover:bg-dark-surface rounded-lg transition-all"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+              </svg>
+            </button>
+
+            {/* Header */}
+            <h2 className="text-2xl font-bold text-neutral-100 mb-6">Create Task</h2>
+
+            {/* Form */}
+            <form onSubmit={handleAddTask} className="space-y-5">
+              {/* Title Field */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Title
+                </label>
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  placeholder="What needs to be done?"
+                  className="w-full px-4 py-3 bg-dark-elevated border-2 border-primary-600/30 text-neutral-100 placeholder-neutral-500 rounded-xl focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all"
+                  disabled={isSubmitting}
+                  autoFocus
+                />
+              </div>
+
+              {/* Description Field */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Description <span className="text-neutral-500">(optional)</span>
+                </label>
+                <textarea
+                  value={newDescription}
+                  onChange={(e) => setNewDescription(e.target.value)}
+                  placeholder="Add more details..."
+                  rows={3}
+                  className="w-full px-4 py-3 bg-dark-elevated border-2 border-dark-border text-neutral-100 placeholder-neutral-500 rounded-xl focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all resize-none"
+                  disabled={isSubmitting}
+                />
+              </div>
+
+              {/* Status Field */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Status
+                </label>
+                <select
+                  value={newStatus}
+                  onChange={(e) => setNewStatus(e.target.value as 'to_do' | 'in_progress' | 'done')}
+                  className="w-full px-4 py-3 bg-dark-elevated border-2 border-dark-border text-neutral-100 rounded-xl focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all"
+                  disabled={isSubmitting}
+                >
+                  <option value="to_do">To Do</option>
+                  <option value="in_progress">In Progress</option>
+                  <option value="done">Done</option>
+                </select>
+              </div>
+
+              {/* Due Date Field */}
+              <div>
+                <label className="block text-sm font-medium text-neutral-300 mb-2">
+                  Due Date <span className="text-neutral-500">(optional)</span>
+                </label>
+                <div className="relative">
+                  <svg className="absolute right-4 top-1/2 -translate-y-1/2 w-5 h-5 text-neutral-400 pointer-events-none" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                  </svg>
+                  <input
+                    type="date"
+                    value={newDueDate}
+                    onChange={(e) => setNewDueDate(e.target.value)}
+                    className="w-full px-4 py-3 pr-12 bg-dark-elevated border-2 border-dark-border text-neutral-100 rounded-xl focus:border-primary-600 focus:ring-2 focus:ring-primary-600/20 outline-none transition-all"
+                    disabled={isSubmitting}
+                  />
+                </div>
+              </div>
+
+              {/* Buttons */}
+              <div className="flex gap-3 pt-4">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setShowCreateModal(false);
+                    setNewTitle('');
+                    setNewDescription('');
+                    setNewDueDate('');
+                    setNewStatus('to_do');
+                  }}
+                  className="flex-1 px-4 py-3 bg-dark-surface text-neutral-300 font-medium rounded-xl hover:bg-dark-elevated transition-all"
+                  disabled={isSubmitting}
+                >
+                  Cancel
+                </button>
+                <button
+                  type="submit"
+                  disabled={isSubmitting || !newTitle.trim()}
+                  className="flex-1 px-4 py-3 bg-gradient-to-r from-primary-600 to-primary-700 text-white font-medium rounded-xl shadow-md hover:shadow-lg hover:from-primary-700 hover:to-primary-800 disabled:opacity-50 disabled:cursor-not-allowed transition-all"
+                >
+                  {isSubmitting ? 'Creating...' : 'Create Task'}
+                </button>
+              </div>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

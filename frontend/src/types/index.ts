@@ -63,7 +63,7 @@ export interface AuthState {
 }
 
 // UI State Types
-export type TaskFilter = 'all' | 'pending' | 'completed';
+export type TaskFilter = 'all' | 'pending' | 'completed' | 'to_do' | 'in_progress' | 'done';
 
 export interface TaskState {
   tasks: Task[];

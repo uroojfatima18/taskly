@@ -2,7 +2,10 @@
   "permissions": {
     "allow": [
       "Bash(dir /b /s \"D:\\Urooj\\UroojCode\\hackthon-todo2\\specs\")",
-      "Bash(cat:*)"
+      "Bash(cat:*)",
+      "Bash(npm install:*)",
+      "Bash(npm run build:*)",
+      "Bash(npx tsc:*)"
     ]
   }
 }
