@@ -1,13 +1,15 @@
 # Password hashing utilities using passlib with bcrypt
 
 from passlib.context import CryptContext
+from fastapi import HTTPException
 
 pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
 
-def hash_password(password: str) -> str:
-    """Hash a password using bcrypt."""
-    return pwd_context.hash(password)
+def hash_password(password: str):
+    if len(password) > 72:
+        raise HTTPException(status_code=400, detail="Password too long, must be <= 72 characters")
+    return pwd_context.hash(password)d
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
