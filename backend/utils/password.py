@@ -9,7 +9,7 @@ pwd_context = CryptContext(schemes=["bcrypt"], deprecated="auto")
 def hash_password(password: str):
     if len(password) > 72:
         raise HTTPException(status_code=400, detail="Password too long, must be <= 72 characters")
-    return pwd_context.hash(password)d
+    return pwd_context.hash(password)
 
 
 def verify_password(plain_password: str, hashed_password: str) -> bool:
