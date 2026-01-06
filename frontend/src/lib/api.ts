@@ -12,7 +12,8 @@ import {
   AuthSession,
 } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://taskly-todo-backend.vercel.app/api';
+
 
 class ApiClient {
   private getToken(): string | null {
