@@ -1,3 +1,4 @@
+// lib/api.ts
 // T006: API client with 401 interceptor and Bearer token handling
 
 import {
@@ -13,7 +14,6 @@ import {
 } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL || 'https://taskly-todo-backend.vercel.app/api';
-
 
 class ApiClient {
   private getToken(): string | null {
@@ -36,7 +36,7 @@ class ApiClient {
       },
     });
 
-    // T006: 401 interceptor - redirect to login on unauthorized
+    // 401 interceptor - redirect to login on unauthorized
     if (response.status === 401) {
       if (typeof window !== 'undefined') {
         localStorage.removeItem('auth_token');
@@ -55,7 +55,6 @@ class ApiClient {
       );
     }
 
-    // Handle 204 No Content
     if (response.status === 204) {
       return undefined as T;
     }
@@ -65,65 +64,23 @@ class ApiClient {
 
   // Auth endpoints
   async login(credentials: LoginCredentials): Promise<AuthSession> {
-    const response = await fetch(`${API_URL}/api/auth/login`, {
+    return this.request<AuthSession>('/auth/login', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(credentials),
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Login failed' }));
-      throw new Error(
-        typeof errorData.detail === 'string'
-          ? errorData.detail
-          : 'Invalid credentials'
-      );
-    }
-
-    return response.json();
   }
 
   async signup(credentials: SignupCredentials): Promise<AuthSession> {
-    const response = await fetch(`${API_URL}/api/auth/signup`, {
+    return this.request<AuthSession>('/auth/signup', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
       body: JSON.stringify(credentials),
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Signup failed' }));
-      throw new Error(
-        typeof errorData.detail === 'string'
-          ? errorData.detail
-          : 'Signup failed'
-      );
-    }
-
-    return response.json();
   }
 
   async demoLogin(): Promise<AuthSession> {
-    const response = await fetch(`${API_URL}/api/auth/demo`, {
+    return this.request<AuthSession>('/auth/demo', {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
-
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ detail: 'Demo login failed' }));
-      throw new Error(
-        typeof errorData.detail === 'string'
-          ? errorData.detail
-          : 'Demo login failed'
-      );
-    }
-
-    return response.json();
   }
 
   // Task endpoints
@@ -138,32 +95,32 @@ class ApiClient {
       per_page: String(perPage),
     });
 
-    return this.request<TaskListResponse>(`/api/tasks?${params}`);
+    return this.request<TaskListResponse>(`/tasks?${params}`);
   }
 
   async createTask(data: TaskCreate): Promise<Task> {
-    return this.request<Task>('/api/tasks', {
+    return this.request<Task>('/tasks', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateTask(id: number, data: TaskUpdate): Promise<Task> {
-    return this.request<Task>(`/api/tasks/${id}`, {
+    return this.request<Task>(`/tasks/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
   async toggleTaskStatus(id: number, data: TaskStatusUpdate): Promise<Task> {
-    return this.request<Task>(`/api/tasks/${id}/complete`, {
+    return this.request<Task>(`/tasks/${id}/complete`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async deleteTask(id: number): Promise<void> {
-    return this.request<void>(`/api/tasks/${id}`, {
+    return this.request<void>(`/tasks/${id}`, {
       method: 'DELETE',
     });
   }

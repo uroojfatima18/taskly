@@ -1,5 +1,8 @@
-# api/index.py
-from backend.main import app  # adjust path if needed
+import sys
+import os
+sys.path.append(os.path.join(os.path.dirname(__file__), ".."))
+
+from main import app
 from mangum import Mangum
 
 handler = Mangum(app)

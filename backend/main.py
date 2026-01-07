@@ -34,9 +34,13 @@ app.add_middleware(
 app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
 app.add_middleware(LoggingMiddleware)
 
+# app.include_router(health.router, prefix="/api")
+# app.include_router(auth.router, prefix="/api")
+# app.include_router(tasks.router, prefix="/api")
+
 app.include_router(health.router, prefix="/api")
-app.include_router(auth.router, prefix="/api")
-app.include_router(tasks.router, prefix="/api")
+app.include_router(auth.router, prefix="/api/auth")
+app.include_router(tasks.router, prefix="/api/tasks")
 
 
 @app.get("/")
