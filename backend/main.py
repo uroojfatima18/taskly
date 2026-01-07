@@ -1,7 +1,7 @@
 from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from mangum import Mangum
+
 
 
 from db import init_db
@@ -38,10 +38,10 @@ app.add_middleware(LoggingMiddleware)
 # app.include_router(auth.router, prefix="/api")
 # app.include_router(tasks.router, prefix="/api")
 
+
 app.include_router(health.router, prefix="/api")
 app.include_router(auth.router, prefix="/api/auth")
 app.include_router(tasks.router, prefix="/api/tasks")
-
 
 @app.get("/")
 def root():
@@ -52,4 +52,4 @@ def root():
         "docs": "/docs",
         "health": "/api/health",
     }
-handler = Mangum(app)
+app = FastAPI()
