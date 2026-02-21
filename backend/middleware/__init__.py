@@ -1,4 +1,4 @@
-from .logging import LoggingMiddleware
-from .rate_limit import RateLimitMiddleware
+from middleware.logging import LoggingMiddleware
+from middleware.rate_limit import RateLimitMiddleware
 
 __all__ = ["LoggingMiddleware", "RateLimitMiddleware"]

@@ -24,5 +24,10 @@ requests>=2.32.3
 
 # LangChain ecosystem (optional if using LLMs)
 langchain>=0.3.49
+langchain-openai>=0.3.5
+langchain-core>=0.3.22
 openai>=1.76.0
 tiktoken>=0.9.0
+
+# Gemini compatibility
+google-generativeai>=0.8.0

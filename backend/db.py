@@ -26,6 +26,11 @@ class Settings(BaseSettings):
     better_auth_secret: str
     environment: str = "development"
 
+    # AI/Chatbot settings
+    openai_api_key: Optional[str] = None
+    gemini_base_url: Optional[str] = None
+    gemini_api_key: Optional[str] = None
+
     class Config:
         env_file = ".env"
         env_prefix = ""
@@ -79,6 +84,9 @@ def get_engine():
 
 def init_db():
     """Create all tables defined in SQLModel subclasses and run migrations."""
+    from src.models.conversation import Conversation, Message
+    from src.models.tool_call import ToolCall
+
     engine = get_engine()
     SQLModel.metadata.create_all(engine)
 

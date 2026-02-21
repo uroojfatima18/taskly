@@ -13,7 +13,12 @@ import {
   AuthSession,
 } from '@/types';
 
-const API_URL = process.env.NEXT_PUBLIC_API_URL;
+const API_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+
+if (typeof window !== 'undefined') {
+  console.log('Taskly API Client initialized with URL:', API_URL);
+  console.log('NEXT_PUBLIC_API_URL from env:', process.env.NEXT_PUBLIC_API_URL);
+}
 
 class ApiClient {
   private getToken(): string | null {
@@ -21,7 +26,7 @@ class ApiClient {
     return localStorage.getItem('auth_token');
   }
 
-  private async request<T>(
+  public async request<T>(
     endpoint: string,
     options?: RequestInit
   ): Promise<T> {
@@ -64,21 +69,21 @@ class ApiClient {
 
   // Auth endpoints
   async login(credentials: LoginCredentials): Promise<AuthSession> {
-    return this.request<AuthSession>('/auth/login', {
+    return this.request<AuthSession>('/api/auth/login', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
   }
 
   async signup(credentials: SignupCredentials): Promise<AuthSession> {
-    return this.request<AuthSession>('/auth/signup', {
+    return this.request<AuthSession>('/api/auth/signup', {
       method: 'POST',
       body: JSON.stringify(credentials),
     });
   }
 
   async demoLogin(): Promise<AuthSession> {
-    return this.request<AuthSession>('/auth/demo', {
+    return this.request<AuthSession>('/api/auth/demo', {
       method: 'POST',
     });
   }
@@ -95,32 +100,32 @@ class ApiClient {
       per_page: String(perPage),
     });
 
-    return this.request<TaskListResponse>(`/tasks?${params}`);
+    return this.request<TaskListResponse>(`/api/tasks?${params}`);
   }
 
   async createTask(data: TaskCreate): Promise<Task> {
-    return this.request<Task>('/tasks', {
+    return this.request<Task>('/api/tasks', {
       method: 'POST',
       body: JSON.stringify(data),
     });
   }
 
   async updateTask(id: number, data: TaskUpdate): Promise<Task> {
-    return this.request<Task>(`/tasks/${id}`, {
+    return this.request<Task>(`/api/tasks/${id}`, {
       method: 'PUT',
       body: JSON.stringify(data),
     });
   }
 
   async toggleTaskStatus(id: number, data: TaskStatusUpdate): Promise<Task> {
-    return this.request<Task>(`/tasks/${id}/complete`, {
+    return this.request<Task>(`/api/tasks/${id}/complete`, {
       method: 'PATCH',
       body: JSON.stringify(data),
     });
   }
 
   async deleteTask(id: number): Promise<void> {
-    return this.request<void>(`/tasks/${id}`, {
+    return this.request<void>(`/api/tasks/${id}`, {
       method: 'DELETE',
     });
   }

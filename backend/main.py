@@ -6,6 +6,7 @@ from fastapi.middleware.cors import CORSMiddleware
 
 from db import init_db
 from routes import tasks, health, auth
+from src.api.chat_endpoints import router as chat_router
 from middleware import LoggingMiddleware, RateLimitMiddleware
 
 
@@ -22,16 +23,25 @@ app = FastAPI(
     lifespan=lifespan,
 )
 
-# Add middleware (order matters: last added = outermost, runs first)
-# CORS must be outermost to handle preflight OPTIONS requests
+# Add middleware 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Allow all origins
+    allow_origins=[
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+        "http://127.0.0.1:3000",
+        "http://127.0.0.1:3001",
+        "http://127.0.0.1:3002",
+        "http://127.0.0.1:3003",
+        "http://0.0.0.0:3000",
+    ],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )
-app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
+# app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
 app.add_middleware(LoggingMiddleware)
 
 # app.include_router(health.router, prefix="/api")
@@ -40,8 +50,9 @@ app.add_middleware(LoggingMiddleware)
 
 
 app.include_router(health.router, prefix="/api")
-app.include_router(auth.router, prefix="/api/auth")
-app.include_router(tasks.router, prefix="/api/tasks")
+app.include_router(auth.router, prefix="/api")
+app.include_router(tasks.router, prefix="/api")
+app.include_router(chat_router, prefix="/api")
 
 @app.get("/")
 def root():

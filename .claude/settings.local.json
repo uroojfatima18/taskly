@@ -7,7 +7,16 @@
       "Bash(npm run build:*)",
       "Bash(npx tsc:*)",
       "Bash(dir)",
-      "Bash(dir backend)"
+      "Bash(dir backend)",
+      "Skill(sp.phr)",
+      "Bash(.specify/scripts/bash/create-phr.sh --title \"OpenAI Chatbot Integration Spec\" --stage spec --feature \"openai-chatbot-integration\" --json)",
+      "Bash(dir \"D:\\\\Urooj Coding\\\\taskly-phase3\\\\backend\\\\src\\\\agents\")",
+      "Bash(move \"D:\\\\Urooj Coding\\\\taskly-phase3\\\\backend\\\\temp_test_chatbot.py\" \"D:\\\\Urooj Coding\\\\taskly-phase3\\\\backend\\\\test_chatbot.py\")",
+      "Bash(python -c \"import sys; print\\(sys.path\\)\")",
+      "Bash(pip install google-generativeai)",
+      "Bash(python -c \"from src.agents.openai_agent import GeminiOpenAIAgent; print\\(''Import successful''\\)\")",
+      "Bash(python -c \"import google.generativeai as genai; print\\(''Import successful''\\)\")",
+      "Bash(pip install sqlmodel fastapi)"
     ]
   }
 }

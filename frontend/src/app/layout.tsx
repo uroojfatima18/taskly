@@ -5,6 +5,7 @@ import type { Metadata } from 'next';
 import { Inter } from 'next/font/google';
 import { AuthProvider } from '@/context/AuthContext';
 import { ErrorBoundaryWrapper } from '@/components/ErrorBoundary';
+import ChatWidget from '@/components/chat/ChatWidget';
 import './globals.css';
 
 const inter = Inter({ subsets: ['latin'] });
@@ -30,7 +31,10 @@ export default function RootLayout({
           Skip to main content
         </a>
         <ErrorBoundaryWrapper>
-          <AuthProvider>{children}</AuthProvider>
+          <AuthProvider>
+            {children}
+            <ChatWidget />
+          </AuthProvider>
         </ErrorBoundaryWrapper>
       </body>
     </html>
