@@ -93,3 +93,29 @@ export interface ValidationErrorDetail {
   msg: string;
   type: string;
 }
+
+// Chat Entity
+export interface ChatMessage {
+  id: string;
+  role: 'user' | 'assistant';
+  content: string;
+  created_at?: string;
+}
+
+export interface ChatRequest {
+  user_id: string;
+  message: string;
+  conversation_id?: number | null;
+}
+
+export interface ChatResponse {
+  conversation_id: number;
+  response: string;
+  tool_calls: ToolCall[];
+}
+
+export interface ToolCall {
+  name: string;
+  arguments: any;
+  result?: any;
+}

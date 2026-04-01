@@ -11,6 +11,8 @@ import {
   LoginCredentials,
   SignupCredentials,
   AuthSession,
+  ChatRequest,
+  ChatResponse,
 } from '@/types';
 
 const API_URL = process.env.NEXT_PUBLIC_API_URL;
@@ -122,6 +124,14 @@ class ApiClient {
   async deleteTask(id: number): Promise<void> {
     return this.request<void>(`/tasks/${id}`, {
       method: 'DELETE',
+    });
+  }
+
+  // Chat endpoint
+  async chat(data: ChatRequest): Promise<ChatResponse> {
+    return this.request<ChatResponse>('/chat/', {
+      method: 'POST',
+      body: JSON.stringify(data),
     });
   }
 }

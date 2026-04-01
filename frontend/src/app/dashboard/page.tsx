@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react';
 import Link from 'next/link';
 import { api } from '@/lib/api';
 import { TasklyLogo } from '@/components/ui/TasklyLogo';
+import { ChatBot } from '@/components/ChatBot';
 
 
 interface Task {
@@ -679,6 +680,12 @@ export default function DashboardPage() {
           )}
         </div>
       </main>
+
+      {/* Floating Chat Bot */}
+      <ChatBot 
+        userId={typeof window !== 'undefined' ? (localStorage.getItem('auth_user') ? JSON.parse(localStorage.getItem('auth_user')!).id : '') : ''} 
+        onTaskAction={fetchTasks} 
+      />
 
       {/* Create Task Modal */}
       {showCreateModal && (

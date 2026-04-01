@@ -2,10 +2,8 @@ from contextlib import asynccontextmanager
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
 
-
-
 from db import init_db
-from routes import tasks, health, auth
+from routes import tasks, health, auth, chat
 from middleware import LoggingMiddleware, RateLimitMiddleware
 
 
@@ -34,14 +32,10 @@ app.add_middleware(
 app.add_middleware(RateLimitMiddleware, requests_per_minute=60)
 app.add_middleware(LoggingMiddleware)
 
-# app.include_router(health.router, prefix="/api")
-# app.include_router(auth.router, prefix="/api")
-# app.include_router(tasks.router, prefix="/api")
-
-
 app.include_router(health, prefix="/api")
 app.include_router(auth, prefix="/api")
 app.include_router(tasks, prefix="/api/tasks")
+app.include_router(chat, prefix="/api/chat")
 
 @app.get("/")
 def root():

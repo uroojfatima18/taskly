@@ -1,6 +1,7 @@
 from typing import Optional
 from sqlmodel import SQLModel, create_engine, Session, text
-from pydantic_settings import BaseSettings
+from pydantic_settings import BaseSettings, SettingsConfigDict
+from pydantic import Field
 from functools import lru_cache
 import logging
 import base64
@@ -11,33 +12,26 @@ logger = logging.getLogger(__name__)
 # Settings
 # -------------------------
 class Settings(BaseSettings):
-    # Option 1: Single DATABASE_URL
-    database_url: Optional[str] = None
+    model_config = SettingsConfigDict(
+        env_file=".env",
+        env_file_encoding='utf-8',
+        extra="ignore"
+    )
 
-    # Option 2: Separate DB variables
-    db_host: Optional[str] = None
-    db_user: Optional[str] = None
-    db_pass: Optional[str] = None
-    dbname: Optional[str] = None
+    # Database
+    database_url: Optional[str] = Field(None, validation_alias="DATABASE_URL")
+    db_host: Optional[str] = Field(None, validation_alias="DB_HOST")
+    db_user: Optional[str] = Field(None, validation_alias="DB_USER")
+    db_pass: Optional[str] = Field(None, validation_alias="DB_PASS")
+    dbname: Optional[str] = Field(None, validation_alias="DBNAME")
+    db_url_encoded: Optional[str] = Field(None, validation_alias="DB_URL_ENCODED")
 
-    # Option 3: Base64 encoded DATABASE_URL
-    db_url_encoded: Optional[str] = None
+    # Security & Auth
+    better_auth_secret: str = Field(..., validation_alias="BETTER_AUTH_SECRET")
+    environment: str = Field("development", validation_alias="ENVIRONMENT")
 
-    better_auth_secret: str
-    environment: str = "development"
-
-    class Config:
-        env_file = ".env"
-        env_prefix = ""
-        fields = {
-            "database_url": {"env": "DATABASE_URL"},
-            "db_host": {"env": "DB_HOST"},
-            "db_user": {"env": "DB_USER"},
-            "db_pass": {"env": "DB_PASS"},
-            "dbname": {"env": "DBNAME"},
-            "db_url_encoded": {"env": "DB_URL_ENCODED"},
-            "better_auth_secret": {"env": "BETTER_AUTH_SECRET"},
-        }
+    # AI / External Services
+    openrouter_api_key: Optional[str] = Field(None, validation_alias="OPENROUTER_API_KEY")
 
     def get_database_url(self) -> str:
         """Build database URL from DATABASE_URL, encoded URL, or separate parts."""
