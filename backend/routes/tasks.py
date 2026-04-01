@@ -15,7 +15,7 @@ from schemas import (
 from dependencies.auth import get_current_user
 from utils.errors import not_found, forbidden
 
-router = APIRouter(prefix="/tasks", tags=["tasks"])
+router = APIRouter(tags=["tasks"])
 
 
 @router.post("", response_model=TaskResponse, status_code=status.HTTP_201_CREATED)
@@ -40,7 +40,7 @@ def create_task(
 def list_tasks(
     session: Session = Depends(get_session),
     user_id: str = Depends(get_current_user),
-    status_filter: Optional[Literal["all", "pending", "completed"]] = Query(
+    status_filter: Optional[Literal["all", "pending", "completed", "to_do", "in_progress", "done"]] = Query(
         default="all", alias="status"
     ),
     page: int = Query(default=1, ge=1),
@@ -48,19 +48,25 @@ def list_tasks(
 ):
     query = select(Task).where(Task.user_id == user_id)
 
-    if status_filter == "pending":
+    if status_filter in ["pending", "to_do"]:
         query = query.where(Task.completed == False)
-    elif status_filter == "completed":
+    elif status_filter in ["completed", "done"]:
         query = query.where(Task.completed == True)
+    elif status_filter == "in_progress":
+        # We don't have an in_progress field in DB yet, so we just return pending or an empty query.
+        # Returning pending tasks for now as a fallback:
+        query = query.where(Task.completed == False)
 
     query = query.order_by(col(Task.created_at).desc())
 
     # Use SQL COUNT for efficient counting
     count_query = select(func.count()).select_from(Task).where(Task.user_id == user_id)
-    if status_filter == "pending":
+    if status_filter in ["pending", "to_do"]:
         count_query = count_query.where(Task.completed == False)
-    elif status_filter == "completed":
+    elif status_filter in ["completed", "done"]:
         count_query = count_query.where(Task.completed == True)
+    elif status_filter == "in_progress":
+        count_query = count_query.where(Task.completed == False)
 
     total = session.exec(count_query).one()
 

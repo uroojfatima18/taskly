@@ -139,7 +139,7 @@ npm install
 
 # Setup environment variables
 # Create .env.local file with:
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
 
 # Start the development server
 npm run dev
@@ -190,7 +190,7 @@ mypy .
 ### Frontend (.env.local)
 
 ```env
-NEXT_PUBLIC_API_URL=http://localhost:8000
+NEXT_PUBLIC_API_URL=http://localhost:8000/api
 ```
 
 ### Backend (.env)
@@ -223,15 +223,6 @@ BETTER_AUTH_SECRET=your-auth-secret-here
 - **IconCircle** - Circular icon backgrounds with badges
 - **Button** - Primary, secondary, and ghost variants
 
-## Contributing
-
-Contributions are welcome! Please follow these steps:
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Commit your changes (`git commit -m 'Add amazing feature'`)
-4. Push to the branch (`git push origin feature/amazing-feature`)
-5. Open a Pull Request
 
 ## License
 

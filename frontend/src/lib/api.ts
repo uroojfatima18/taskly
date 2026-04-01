@@ -38,12 +38,12 @@ class ApiClient {
 
     // 401 interceptor - redirect to login on unauthorized
     if (response.status === 401) {
-      if (typeof window !== 'undefined') {
+      if (typeof window !== 'undefined' && !endpoint.includes('/auth/login')) {
         localStorage.removeItem('auth_token');
         localStorage.removeItem('auth_user');
         window.location.href = '/login';
       }
-      throw new Error('Unauthorized');
+      throw new Error('Invalid email or password');
     }
 
     if (!response.ok) {

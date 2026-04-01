@@ -74,7 +74,20 @@ def get_engine():
     global engine
     if engine is None:
         settings = get_settings()
-        engine = create_engine(settings.get_database_url(), echo=True)  # echo=True for debug
+        engine = create_engine(
+            settings.get_database_url(),
+            echo=False,  # Disable SQL logging for performance
+            pool_pre_ping=True,  # Test connections before using them
+            pool_size=5,  # Number of connections to maintain
+            max_overflow=10,  # Max additional connections when pool is full
+            connect_args={
+                "connect_timeout": 10,
+                "keepalives": 1,
+                "keepalives_idle": 30,
+                "keepalives_interval": 10,
+                "keepalives_count": 5,
+            }
+        )
     return engine
 
 def init_db():
